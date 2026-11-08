@@ -1,8 +1,8 @@
-﻿# RemovePwd Vue Pages Edition
+# RemovePwd Vue Pages Edition
 
 [简体中文](./README.zh-CN.md) | English
 
-A browser-only Vue port of the document editing restriction cleaner. XLSX, XLSM and PPTX files are processed in browser memory; files are not uploaded. This release does not include the upstream PySide6 desktop source.
+A browser-only Vue port of the document editing restriction cleaner. DOCX, XLSX, XLSM and PPTX files are processed in browser memory; files are not uploaded. This release does not include the upstream PySide6 desktop source.
 
 ## Deploy
 
@@ -10,6 +10,7 @@ Create a GitHub repository and push this directory to its `main` branch. In **Se
 
 ## Supported files
 
+- DOCX: remove the document editing protection marker.
 - XLSX/XLSM: remove worksheet and workbook protection markers.
 - PPTX: remove modification verifier markers.
 - Does not decrypt files that require an opening password.

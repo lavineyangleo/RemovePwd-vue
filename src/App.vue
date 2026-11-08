@@ -8,7 +8,7 @@ const dragOver = ref(false)
 const notice = ref('')
 const noticeType = ref('info')
 const input = ref(null)
-const accepted = '.xlsx,.xlsm,.pptx'
+const accepted = '.docx,.xlsx,.xlsm,.pptx'
 const queueCount = computed(() => files.value.length)
 
 function addFiles(list) {
@@ -95,7 +95,7 @@ function removeItem(id) {
         <div class="upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" /></svg></div>
         <strong>拖放文件到这里</strong>
         <span>或者 <button class="link-button" type="button" @click.stop="input?.click()">浏览文件</button></span>
-        <small>支持 XLSX、XLSM、PPTX · 可多选</small>
+        <small>支持 DOCX、XLSX、XLSM、PPTX · 可多选</small>
       </div>
 
       <div v-if="notice" class="notice" :class="`notice-${noticeType}`" role="status">{{ notice }}</div>
@@ -104,7 +104,7 @@ function removeItem(id) {
         <div class="queue-heading"><h2>待处理文件 <span>{{ queueCount }}</span></h2><button class="clear-button" type="button" :disabled="busy" @click="files = []">清空列表</button></div>
         <ul>
           <li v-for="item in files" :key="item.id" class="file-row">
-            <span class="file-icon">{{ item.file.name.toLowerCase().endsWith('.pptx') ? 'P' : 'X' }}</span>
+            <span class="file-icon">{{ item.file.name.toLowerCase().endsWith('.pptx') ? 'P' : item.file.name.toLowerCase().endsWith('.docx') ? 'W' : 'X' }}</span>
             <div class="file-meta"><strong>{{ item.file.name }}</strong><small>{{ (item.file.size / 1024 / 1024).toFixed(2) }} MB · {{ item.status }}</small><small v-if="item.error" class="error-text">{{ item.error }}</small></div>
             <button v-if="item.result" class="download-button" type="button" @click="download(item)">下载</button>
             <button v-else class="remove-button" type="button" :disabled="busy" aria-label="移除文件" @click="removeItem(item.id)">×</button>
@@ -118,6 +118,7 @@ function removeItem(id) {
         <div class="format-grid">
           <div><span class="format-badge excel">X</span><span><strong>Excel</strong><small>XLSX、XLSM 工作表与工作簿保护</small></span><b>支持</b></div>
           <div><span class="format-badge powerpoint">P</span><span><strong>PowerPoint</strong><small>PPTX 修改限制</small></span><b>支持</b></div>
+          <div><span class="format-badge word">W</span><span><strong>Word</strong><small>DOCX 文档编辑保护</small></span><b>支持</b></div>
           <div><span class="format-badge pdf">PDF</span><span><strong>PDF 与加密文件</strong><small>浏览器版暂不支持</small></span><b class="muted">暂不支持</b></div>
         </div>
         <p>此工具仅用于清除文档中的编辑权限标记，不能解密需要密码才能打开的文件。请仅处理你有权修改的文档。</p>

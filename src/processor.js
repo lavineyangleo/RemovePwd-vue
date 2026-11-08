@@ -1,19 +1,27 @@
 import { strFromU8, strToU8, unzipSync, zipSync } from '../public/vendor/fflate-0.8.2.js'
 
-const supported = new Set(['xlsx', 'xlsm', 'pptx'])
+const supported = new Set(['xlsx', 'xlsm', 'pptx', 'docx'])
 const extensionOf = (name) => name.split('.').pop()?.toLowerCase() ?? ''
 
 function removeProtectionXml(xml, extension, path) {
+  const normalizedPath = path.toLowerCase()
+  if (!normalizedPath.endsWith('.xml')) return { changed: false, content: xml }
+
+  let targetNames = []
+  if (extension === 'xlsx' || extension === 'xlsm') {
+    if (!/(^|\/)(xl\/worksheets\/|xl\/workbook\.xml$)/i.test(normalizedPath)) return { changed: false, content: xml }
+    targetNames = ['sheetProtection', 'workbookProtection']
+  } else if (extension === 'pptx') {
+    if (/^ppt\/(slides|slidelayouts|slidemasters)\//i.test(normalizedPath)) return { changed: false, content: xml }
+    targetNames = ['modifyVerifier']
+  } else if (extension === 'docx') {
+    if (normalizedPath !== 'word/settings.xml') return { changed: false, content: xml }
+    targetNames = ['documentProtection']
+  }
+
   const doc = new DOMParser().parseFromString(xml, 'application/xml')
   if (doc.querySelector('parsererror')) throw new Error(`XML 解析失败：${path}`)
-  let targets = []
-  if (extension === 'xlsx' || extension === 'xlsm') {
-    if (!path.endsWith('.xml') || !/(^|\/)(xl\/worksheets\/|xl\/workbook\.xml$)/i.test(path)) return { changed: false, content: xml }
-    targets = [...doc.getElementsByTagName('*')].filter((node) => ['sheetProtection', 'workbookProtection'].includes(node.localName))
-  } else if (extension === 'pptx') {
-    if (!path.endsWith('.xml') || /(^|\/)(ppt\/slides\/|ppt\/slideLayouts\/|ppt\/slideMasters\/)/i.test(path)) return { changed: false, content: xml }
-    targets = [...doc.getElementsByTagName('*')].filter((node) => node.localName === 'modifyVerifier')
-  }
+  const targets = [...doc.getElementsByTagName('*')].filter((node) => targetNames.includes(node.localName))
   for (const node of targets) node.parentNode?.removeChild(node)
   if (!targets.length) return { changed: false, content: xml }
   return { changed: true, content: new XMLSerializer().serializeToString(doc) }
@@ -21,7 +29,7 @@ function removeProtectionXml(xml, extension, path) {
 
 export async function removeRestrictions(file) {
   const extension = extensionOf(file.name)
-  if (!supported.has(extension)) throw new Error('仅支持 XLSX、XLSM 和 PPTX。')
+  if (!supported.has(extension)) throw new Error('仅支持 DOCX、XLSX、XLSM 和 PPTX。')
   let archive
   try { archive = unzipSync(new Uint8Array(await file.arrayBuffer())) }
   catch { throw new Error('文件不是有效的 Office Open XML 压缩包，或文件已加密。') }
