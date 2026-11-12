@@ -2,7 +2,7 @@
 
 [简体中文](./README.zh-CN.md) | English
 
-A browser-only Vue port of the document editing restriction cleaner. DOCX, XLSX, XLSM and PPTX files are processed in browser memory; files are not uploaded. This release does not include the upstream PySide6 desktop source.
+A browser-only Vue port of the document editing restriction cleaner. PDF, DOCX, XLSX, XLSM and PPTX files are processed in browser memory; files are not uploaded. This release does not include the upstream PySide6 desktop source.
 
 ## Deploy
 
@@ -13,8 +13,8 @@ Create a GitHub repository and push this directory to its `main` branch. In **Se
 - DOCX: remove the document editing protection marker.
 - XLSX/XLSM: remove worksheet and workbook protection markers.
 - PPTX: remove modification verifier markers.
-- Does not decrypt files that require an opening password.
-- PDF is not supported by this browser edition.
+- Encrypted PDFs can be decrypted locally when the correct opening password is provided.\n- The app never guesses, cracks, or bypasses opening passwords.
+- PDF permissions can be rewritten locally; encrypted PDFs require the correct opening password.
 
 ## License and attribution
 

@@ -8,6 +8,7 @@ const dragOver = ref(false)
 const notice = ref('')
 const noticeType = ref('info')
 const input = ref(null)
+const password = ref('')
 const accepted = '.docx,.xlsx,.xlsm,.pptx'
 const queueCount = computed(() => files.value.length)
 
@@ -57,7 +58,7 @@ async function processAll() {
     item.status = '处理中'
     item.error = ''
     try {
-      const { blob, changedCount } = await removeRestrictions(item.file)
+      const { blob, changedCount } = await removeRestrictions(item.file, password.value)
       item.result = blob
       item.status = `完成 · 清理 ${changedCount} 处限制`
       success += 1
@@ -100,6 +101,8 @@ function removeItem(id) {
 
       <div v-if="notice" class="notice" :class="`notice-${noticeType}`" role="status">{{ notice }}</div>
 
+      <label class="password-field"><span>PDF 打开密码（可选）</span><input v-model="password" type="password" autocomplete="off" placeholder="仅处理加密 PDF 时填写" /></label>
+
       <section v-if="queueCount" class="queue">
         <div class="queue-heading"><h2>待处理文件 <span>{{ queueCount }}</span></h2><button class="clear-button" type="button" :disabled="busy" @click="files = []">清空列表</button></div>
         <ul>
@@ -119,10 +122,10 @@ function removeItem(id) {
           <div><span class="format-badge excel">X</span><span><strong>Excel</strong><small>XLSX、XLSM 工作表与工作簿保护</small></span><b>支持</b></div>
           <div><span class="format-badge powerpoint">P</span><span><strong>PowerPoint</strong><small>PPTX 修改限制</small></span><b>支持</b></div>
           <div><span class="format-badge word">W</span><span><strong>Word</strong><small>DOCX 文档编辑保护</small></span><b>支持</b></div>
-          <div><span class="format-badge pdf">PDF</span><span><strong>PDF</strong><small>浏览器版暂不支持 PDF 文件</small></span><b class="muted">暂不支持</b></div>
-          <div><span class="format-badge encrypted">锁</span><span><strong>需要密码才能打开的文件</strong><small>不支持解密打开密码</small></span><b class="muted">暂不支持</b></div>
+          <div><span class="format-badge pdf">PDF</span><span><strong>PDF</strong><small>支持移除权限；加密文件需填写正确密码</small></span><b>支持</b></div>
+          <div><span class="format-badge encrypted">锁</span><span><strong>需要密码才能打开的文件</strong><small>填写正确密码后在本地解密</small></span><b>需密码</b></div>
         </div>
-        <p>支持清除以上 Office 格式的编辑保护标记，但不会破解打开密码。请仅处理你有权修改的文档。</p>
+        <p>密码只在当前浏览器内存中使用，不会上传；工具不会猜测、破解或绕过密码。请仅处理你有权修改的文档。</p>
       </section>
       <footer>RemovePwd · Vue 浏览器版 <span>文件由你的浏览器处理</span></footer>
     </section>

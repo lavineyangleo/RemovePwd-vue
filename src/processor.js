@@ -1,7 +1,22 @@
 import { strFromU8, strToU8, unzipSync, zipSync } from '../public/vendor/fflate-0.8.2.js'
+import createQpdfModule from '@neslinesli93/qpdf-wasm'
 
-const supported = new Set(['xlsx', 'xlsm', 'pptx', 'docx'])
+const supported = new Set(['pdf', 'xlsx', 'xlsm', 'pptx', 'docx'])
 const extensionOf = (name) => name.split('.').pop()?.toLowerCase() ?? ''
+let qpdfPromise
+
+async function removePdfRestrictions(file, password = '') {
+  qpdfPromise ??= createQpdfModule({ locateFile: () => `${import.meta.env.BASE_URL}vendor/qpdf-0.3.1.wasm` })
+  const qpdf = await qpdfPromise
+  const inputPath = `/input-${Date.now()}.pdf`
+  const outputPath = `/output-${Date.now()}.pdf`
+  qpdf.FS.writeFile(inputPath, new Uint8Array(await file.arrayBuffer()))
+  const args = password ? [`--password=${password}`, '--decrypt', inputPath, outputPath] : ['--decrypt', inputPath, outputPath]
+  const exitCode = qpdf.callMain(args)
+  if (exitCode !== 0) throw new Error(password ? 'PDF 密码错误，或文件无法解密。' : 'PDF 受密码保护，请输入正确的打开密码。')
+  const output = qpdf.FS.readFile(outputPath)
+  return { blob: new Blob([output], { type: 'application/pdf' }), changedCount: 1 }
+}
 
 function removeProtectionXml(xml, extension, path) {
   const normalizedPath = path.toLowerCase()
@@ -27,9 +42,10 @@ function removeProtectionXml(xml, extension, path) {
   return { changed: true, content: new XMLSerializer().serializeToString(doc) }
 }
 
-export async function removeRestrictions(file) {
+export async function removeRestrictions(file, password = '') {
   const extension = extensionOf(file.name)
-  if (!supported.has(extension)) throw new Error('仅支持 DOCX、XLSX、XLSM 和 PPTX。')
+  if (!supported.has(extension)) throw new Error('仅支持 PDF、DOCX、XLSX、XLSM 和 PPTX。')
+  if (extension === 'pdf') return removePdfRestrictions(file, password)
   let archive
   try { archive = unzipSync(new Uint8Array(await file.arrayBuffer())) }
   catch { throw new Error('文件不是有效的 Office Open XML 压缩包，或文件已加密。') }
