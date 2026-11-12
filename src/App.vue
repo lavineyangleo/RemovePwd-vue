@@ -119,9 +119,10 @@ function removeItem(id) {
           <div><span class="format-badge excel">X</span><span><strong>Excel</strong><small>XLSX、XLSM 工作表与工作簿保护</small></span><b>支持</b></div>
           <div><span class="format-badge powerpoint">P</span><span><strong>PowerPoint</strong><small>PPTX 修改限制</small></span><b>支持</b></div>
           <div><span class="format-badge word">W</span><span><strong>Word</strong><small>DOCX 文档编辑保护</small></span><b>支持</b></div>
-          <div><span class="format-badge pdf">PDF</span><span><strong>PDF 与加密文件</strong><small>浏览器版暂不支持</small></span><b class="muted">暂不支持</b></div>
+          <div><span class="format-badge pdf">PDF</span><span><strong>PDF</strong><small>浏览器版暂不支持 PDF 文件</small></span><b class="muted">暂不支持</b></div>
+          <div><span class="format-badge encrypted">锁</span><span><strong>需要密码才能打开的文件</strong><small>不支持解密打开密码</small></span><b class="muted">暂不支持</b></div>
         </div>
-        <p>此工具仅用于清除文档中的编辑权限标记，不能解密需要密码才能打开的文件。请仅处理你有权修改的文档。</p>
+        <p>支持清除以上 Office 格式的编辑保护标记，但不会破解打开密码。请仅处理你有权修改的文档。</p>
       </section>
       <footer>RemovePwd · Vue 浏览器版 <span>文件由你的浏览器处理</span></footer>
     </section>
